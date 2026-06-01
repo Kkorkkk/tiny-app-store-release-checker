@@ -24,7 +24,7 @@
   "author": "Kkorkkk",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Kkorkkk/tiny-app-store-release-checker.git"
+    "url": "git+https://github.com/Kkorkkk/tiny-app-store-release-checker.git"
   },
   "bugs": {
     "url": "https://github.com/Kkorkkk/tiny-app-store-release-checker/issues"
@@ -36,5 +36,7 @@
     "public",
     "README.md",
     "LICENSE"
-  ]
+  ],
+  "main": "./src/index.js",
+  "exports": "./src/index.js"
 }

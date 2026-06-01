@@ -19,15 +19,22 @@ const gates = [
 export function checkRelease(meta) {
   return gates.map(([key, label]) => {
     const value = meta[key];
-    let ok = Boolean(value);
-    if (key === "bundleId") ok = /^[A-Za-z0-9]+(\.[A-Za-z0-9-]+)+$/.test(String(value || ""));
-    if (key === "version") ok = /\d+\.\d+/.test(String(value || ""));
+    let ok = truthyValue(value);
+    if (key === "bundleId") ok = /^[A-Za-z0-9]+(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)+$/.test(String(value || ""));
+    if (key === "version") ok = /^\d+\.\d+(?:\.\d+)?(?:\s+build\s+\d+)?$/i.test(String(value || ""));
     if (key === "screenshots") {
       const requiredGroups = requiredScreenshots(meta);
       ok = requiredGroups.every((group) => screenshotGroups(value).includes(group));
     }
     return { key, label, ok, detail: formatDetail(key === "screenshots" ? screenshotGroups(value) : value) };
   });
+}
+
+export function truthyValue(value) {
+  if (value == null) return false;
+  if (typeof value === "boolean") return value;
+  if (typeof value === "string") return !["", "0", "false", "no", "missing"].includes(value.trim().toLowerCase());
+  return Boolean(value);
 }
 
 export function requiredScreenshots(meta) {
@@ -38,10 +45,16 @@ export function requiredScreenshots(meta) {
 }
 
 export function screenshotGroups(value) {
-  if (typeof value === "string") return requiredScreenshotGroups.filter((group) => value.toLowerCase().includes(group.toLowerCase()));
+  if (typeof value === "string") {
+    const tokens = value.split(/[^A-Za-z0-9.]+/).filter(Boolean).map((token) => token.toLowerCase());
+    return requiredScreenshotGroups.filter((group) => tokens.includes(group.toLowerCase()));
+  }
   if (!Array.isArray(value)) return [];
-  const text = value.map((item) => typeof item === "string" ? item : `${item.device || ""} ${item.width || ""}x${item.height || ""}`).join(" ").toLowerCase();
-  return requiredScreenshotGroups.filter((group) => text.includes(group.toLowerCase()));
+  const tokens = value.flatMap((item) => {
+    if (typeof item === "string") return item.split(/[^A-Za-z0-9.]+/);
+    return [item.device, `${item.width || ""}x${item.height || ""}`];
+  }).filter(Boolean).map((token) => String(token).toLowerCase());
+  return requiredScreenshotGroups.filter((group) => tokens.includes(group.toLowerCase()));
 }
 
 function formatDetail(value) {

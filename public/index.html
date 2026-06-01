@@ -15,16 +15,50 @@ button{padding:10px 14px}
 <pre id="output"></pre>
 <script>
 const gates = ["agreements","bundleId","version","screenshots","privacy","metadata","build","reviewNotes","iap"];
+const labels = {
+  agreements: "Apple agreements, tax, and banking are active",
+  bundleId: "Bundle ID is final",
+  version: "Version and build number are set",
+  screenshots: "Screenshots exist for required device sizes",
+  privacy: "Privacy answers and privacy manifest are complete",
+  metadata: "Name, subtitle, keywords, description, support URL are ready",
+  build: "A reviewable build is selected",
+  reviewNotes: "Review notes and demo account are ready when needed",
+  iap: "IAP or subscription products are configured, if used"
+};
+const truthyValue = value => {
+  if (value == null) return false;
+  if (typeof value === "boolean") return value;
+  if (typeof value === "string") return !["", "0", "false", "no", "missing"].includes(value.trim().toLowerCase());
+  return Boolean(value);
+};
+const requiredScreenshots = meta => {
+  const devices = String(meta.supportedDevices || meta.devices || "iphone,ipad").toLowerCase();
+  if (devices.includes("iphone") && !devices.includes("ipad")) return ["6.7", "6.5"];
+  if (devices.includes("ipad") && !devices.includes("iphone")) return ["iPad"];
+  return ["6.7", "6.5", "iPad"];
+};
 const screenshotGroups = value => {
-  const text = Array.isArray(value) ? value.map(item => typeof item === "string" ? item : `${item.device || ""} ${item.width || ""}x${item.height || ""}`).join(" ") : String(value || "");
-  return ["6.7","6.5","iPad"].filter(group => text.toLowerCase().includes(group.toLowerCase()));
+  const tokens = (Array.isArray(value)
+    ? value.flatMap(item => typeof item === "string" ? item.split(/[^A-Za-z0-9.]+/) : [item.device, `${item.width || ""}x${item.height || ""}`])
+    : String(value || "").split(/[^A-Za-z0-9.]+/)).filter(Boolean).map(token => String(token).toLowerCase());
+  return ["6.7","6.5","iPad"].filter(group => tokens.includes(group.toLowerCase()));
 };
 document.querySelector("#run").onclick = () => {
-  const meta = JSON.parse(document.querySelector("#input").value);
-  document.querySelector("#output").textContent = gates.map(key => {
-    const value = key === "screenshots" ? screenshotGroups(meta[key]).join(", ") : meta[key];
-    return `- [${value ? "x" : " "}] ${key}: ${value || "missing"}`;
-  }).join("\n");
+  try {
+    const meta = JSON.parse(document.querySelector("#input").value);
+    document.querySelector("#output").textContent = gates.map(key => {
+      const value = meta[key];
+      let ok = truthyValue(value);
+      if (key === "bundleId") ok = /^[A-Za-z0-9]+(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)+$/.test(String(value || ""));
+      if (key === "version") ok = /^\d+\.\d+(?:\.\d+)?(?:\s+build\s+\d+)?$/i.test(String(value || ""));
+      if (key === "screenshots") ok = requiredScreenshots(meta).every(group => screenshotGroups(value).includes(group));
+      const detail = key === "screenshots" ? screenshotGroups(value).join(", ") || "missing" : value || "missing";
+      return `- [${ok ? "x" : " "}] ${labels[key]}: ${detail}`;
+    }).join("\n");
+  } catch (error) {
+    document.querySelector("#output").textContent = error.message;
+  }
 };
 </script>
 </html>
