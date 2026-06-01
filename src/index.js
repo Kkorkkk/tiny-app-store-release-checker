@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { readFileSync } from "node:fs";
+import { pathToFileURL } from "node:url";
 
 const requiredScreenshotGroups = ["6.7", "6.5", "iPad"];
 
@@ -21,9 +22,19 @@ export function checkRelease(meta) {
     let ok = Boolean(value);
     if (key === "bundleId") ok = /^[A-Za-z0-9]+(\.[A-Za-z0-9-]+)+$/.test(String(value || ""));
     if (key === "version") ok = /\d+\.\d+/.test(String(value || ""));
-    if (key === "screenshots") ok = screenshotGroups(value).length >= 3;
+    if (key === "screenshots") {
+      const requiredGroups = requiredScreenshots(meta);
+      ok = requiredGroups.every((group) => screenshotGroups(value).includes(group));
+    }
     return { key, label, ok, detail: formatDetail(key === "screenshots" ? screenshotGroups(value) : value) };
   });
+}
+
+export function requiredScreenshots(meta) {
+  const devices = String(meta.supportedDevices || meta.devices || "iphone,ipad").toLowerCase();
+  if (devices.includes("iphone") && !devices.includes("ipad")) return ["6.7", "6.5"];
+  if (devices.includes("ipad") && !devices.includes("iphone")) return ["iPad"];
+  return requiredScreenshotGroups;
 }
 
 export function screenshotGroups(value) {
@@ -56,15 +67,17 @@ function escapeHtml(text) {
   return String(text).replace(/[&<>"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[char]));
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
-  const file = process.argv[2];
-  if (!file) {
-    console.error("Usage: app-store-release-checker app-release.json");
-    process.exit(1);
-  }
+export function parseCliArgs(args) {
+  const file = args.find((arg) => !arg.startsWith("--"));
+  if (!file) throw new Error("Usage: app-store-release-checker app-release.json [--html]");
+  return { file, html: args.includes("--html") };
+}
+
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   try {
+    const { file, html } = parseCliArgs(process.argv.slice(2));
     const results = checkRelease(JSON.parse(readFileSync(file, "utf8")));
-    console.log(process.argv.includes("--html") ? renderHtml(results) : renderChecklist(results));
+    console.log(html ? renderHtml(results) : renderChecklist(results));
     process.exit(results.every((result) => result.ok) ? 0 : 2);
   } catch (error) {
     console.error(`app-store-release-checker: ${error.message}`);
