@@ -10,14 +10,21 @@ pre{background:#111;color:#f5f5f5;padding:16px;white-space:pre-wrap}
 button{padding:10px 14px}
 </style>
 <h1>Tiny App Store Release Checker</h1>
-<textarea id="input">{"agreements":"active","bundleId":"com.example.app","version":"1.0 build 1"}</textarea>
+<textarea id="input">{"agreements":"active","bundleId":"com.example.app","version":"1.0 build 1","screenshots":"6.7-inch, 6.5-inch, iPad"}</textarea>
 <p><button id="run">Check</button></p>
 <pre id="output"></pre>
 <script>
 const gates = ["agreements","bundleId","version","screenshots","privacy","metadata","build","reviewNotes","iap"];
+const screenshotGroups = value => {
+  const text = Array.isArray(value) ? value.map(item => typeof item === "string" ? item : `${item.device || ""} ${item.width || ""}x${item.height || ""}`).join(" ") : String(value || "");
+  return ["6.7","6.5","iPad"].filter(group => text.toLowerCase().includes(group.toLowerCase()));
+};
 document.querySelector("#run").onclick = () => {
   const meta = JSON.parse(document.querySelector("#input").value);
-  document.querySelector("#output").textContent = gates.map(key => `- [${meta[key] ? "x" : " "}] ${key}: ${meta[key] || "missing"}`).join("\n");
+  document.querySelector("#output").textContent = gates.map(key => {
+    const value = key === "screenshots" ? screenshotGroups(meta[key]).join(", ") : meta[key];
+    return `- [${value ? "x" : " "}] ${key}: ${value || "missing"}`;
+  }).join("\n");
 };
 </script>
 </html>
