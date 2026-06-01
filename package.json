@@ -1,0 +1,38 @@
+{
+  "name": "tiny-app-store-release-checker",
+  "version": "0.1.0",
+  "description": "Check small iOS App Store release readiness from local metadata.",
+  "type": "module",
+  "bin": {
+    "app-store-release-checker": "./src/index.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test"
+  },
+  "keywords": [
+    "cli",
+    "developer-tools",
+    "ai",
+    "github"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "author": "Kkorkkk",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Kkorkkk/tiny-app-store-release-checker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Kkorkkk/tiny-app-store-release-checker/issues"
+  },
+  "homepage": "https://github.com/Kkorkkk/tiny-app-store-release-checker#readme",
+  "files": [
+    "src",
+    "examples",
+    "README.md",
+    "LICENSE"
+  ]
+}

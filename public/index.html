@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tiny App Store Release Checker</title>
+<style>
+body{font-family:system-ui;margin:32px;max-width:860px}
+textarea{width:100%;height:220px}
+pre{background:#111;color:#f5f5f5;padding:16px;white-space:pre-wrap}
+button{padding:10px 14px}
+</style>
+<h1>Tiny App Store Release Checker</h1>
+<textarea id="input">{"agreements":"active","bundleId":"com.example.app","version":"1.0 build 1"}</textarea>
+<p><button id="run">Check</button></p>
+<pre id="output"></pre>
+<script>
+const gates = ["agreements","bundleId","version","screenshots","privacy","metadata","build","reviewNotes","iap"];
+document.querySelector("#run").onclick = () => {
+  const meta = JSON.parse(document.querySelector("#input").value);
+  document.querySelector("#output").textContent = gates.map(key => `- [${meta[key] ? "x" : " "}] ${key}: ${meta[key] || "missing"}`).join("\n");
+};
+</script>
+</html>

@@ -1,0 +1,11 @@
+{
+  "agreements": "active",
+  "bundleId": "com.example.demo",
+  "version": "1.0 build 1",
+  "screenshots": "6.7-inch, 6.5-inch, iPad",
+  "privacy": "privacy manifest and ASC answers complete",
+  "metadata": "name, subtitle, description, support URL",
+  "build": "1.0 (1)",
+  "reviewNotes": "local-only app, no login",
+  "iap": "none"
+}
