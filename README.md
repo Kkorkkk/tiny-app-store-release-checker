@@ -2,6 +2,12 @@
 
 [![CI](https://github.com/Kkorkkk/tiny-app-store-release-checker/actions/workflows/ci.yml/badge.svg)](https://github.com/Kkorkkk/tiny-app-store-release-checker/actions/workflows/ci.yml)
 
+## Overview / 项目说明
+
+English: Tiny App Store Release Checker is a local readiness checklist for small iOS App Store submissions. It reviews metadata fields, bundle ID shape, version format, screenshots, privacy answers, build selection, IAP notes, and review materials without logging into App Store Connect.
+
+中文：Tiny App Store Release Checker 是一个面向小型 iOS App Store 提交的本地准备度检查清单。它会检查元数据、Bundle ID 格式、版本号、截图、隐私回答、构建选择、IAP 说明和审核材料，但不会登录 App Store Connect 或提交任何内容。
+
 A local checklist for indie iOS App Store releases.
 
 ## Install
